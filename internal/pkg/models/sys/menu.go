@@ -24,6 +24,15 @@ type Menu struct {
 	OperateType string `gorm:"column:operate_type;size:32;not null;" json:"operate_type" form:"operate_type"`   // 操作类型 none/add/del/view/update
 }
 
+const (
+	TABLE_ROLE_MENU   = "tb_sys_role_menu"
+	TABLE_ADMIN_ROLE  = "tb_sys_admins_role"
+	TABLE_MENU        = "tb_sys_menu"
+	TABLE_ADMIN       = "tb_sys_admins"
+	TABLE_ROLE        = "tb_sys_role"
+	TABLE_MENU_BUTTON = "tb_sys_menu_button"
+)
+
 // 表名
 func (Menu) TableName() string {
 	return TableName("menu")
@@ -44,11 +53,11 @@ func (m *Menu) BeforeUpdate(scope *gorm.Scope) error {
 
 // 获取菜单有权限的操作列表
 func (Menu) GetMenuButton(adminsid uint64, menuCode string, btns *[]string) (err error) {
-	sql := `select operate_type from tb_sys_menu
+	sql := `select operate_type from ` + TABLE_MENU + `
 	      where id in (
-					select menu_id from tb_sys_role_menu where 
-					menu_id in (select id from tb_sys_menu where parent_id in (select id from tb_sys_menu where code=?))
-					and role_id in (select role_id from tb_sys_admins_role where admins_id=?)
+					select menu_id from ` + TABLE_ROLE_MENU + ` where 
+					menu_id in (select id from ` + TABLE_MENU + ` where parent_id in (select id from ` + TABLE_MENU + ` where code=?))
+					and role_id in (select role_id from ` + TABLE_ADMIN_ROLE + ` where admins_id=?)
 				)`
 	err = db.DB.Raw(sql, menuCode, adminsid).Pluck("operate_type", btns).Error
 	return
@@ -56,10 +65,10 @@ func (Menu) GetMenuButton(adminsid uint64, menuCode string, btns *[]string) (err
 
 // 获取管理员权限下所有菜单
 func (Menu) GetMenuByAdminsid(adminsid uint64, menus *[]Menu) (err error) {
-	sql := `select * from tb_sys_menu
+	sql := `select * from ` + TABLE_MENU + `
 	      where id in (
-					select menu_id from tb_sys_role_menu where 
-				  role_id in (select role_id from tb_sys_admins_role where admins_id=?)
+					select menu_id from ` + TABLE_ROLE_MENU + ` where 
+				  role_id in (select role_id from ` + TABLE_ADMIN_ROLE + ` where admins_id=?)
 				)`
 	err = db.DB.Raw(sql, adminsid).Find(menus).Error
 	return
