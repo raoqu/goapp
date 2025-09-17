@@ -49,6 +49,8 @@ func initWeb(config *config.Config){
 	app.Use(middleware.RecoveryMiddleware())
 	app.LoadHTMLGlob(config.Web.StaticPath+"dist/*.html")
 	app.Static("/static", config.Web.StaticPath+"dist/static")
+	// Serve Vite build assets (CSS/JS under dist/assets)
+	app.Static("/assets", config.Web.StaticPath+"dist/assets")
 	app.Static("/resource", config.Web.StaticPath+"resource")
 	app.StaticFile("/favicon.ico", config.Web.StaticPath+"dist/favicon.ico")
 	// 注册路由
