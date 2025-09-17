@@ -50,7 +50,9 @@ export default defineConfig(({ mode }) => {
     ],
     resolve: {
       alias: {
-        '@': path.resolve(__dirname, 'src')
+        '@': path.resolve(__dirname, 'src'),
+        // Force vuedraggable to a UMD build compatible with Rollup/Vite
+        'vuedraggable': 'vuedraggable/dist/vuedraggable.umd.js'
       },
       // allow importing Vue SFCs without specifying .vue
       extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.vue']
@@ -67,6 +69,19 @@ export default defineConfig(({ mode }) => {
           target: 'http://127.0.0.1:8080',
           changeOrigin: true
           // no rewrite: keep /api prefix as requested
+        }
+      }
+    },
+    css: {
+      preprocessorOptions: {
+        scss: {
+          // Suppress Sass deprecation warnings coming from dependencies in node_modules
+          quietDeps: true,
+          // Silence specific deprecation categories if supported by the local sass version
+          // target slash division, @import, and legacy JS API warnings
+          silenceDeprecations: ['slash-div', 'import', 'legacy-js-api'],
+          // Preload sass:math so local styles can migrate to math.div without repeating the directive
+          additionalData: '@use "sass:math";\n'
         }
       }
     },
