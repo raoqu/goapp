@@ -9,7 +9,11 @@ import CodeMirror from 'codemirror'
 import 'codemirror/addon/lint/lint.css'
 import 'codemirror/lib/codemirror.css'
 import 'codemirror/theme/rubyblue.css'
-require('script-loader!jsonlint')
+import jsonlint from 'jsonlint'
+// Expose jsonlint for codemirror/addon/lint/json-lint which expects window.jsonlint
+if (typeof window !== 'undefined') {
+  window.jsonlint = jsonlint
+}
 import 'codemirror/mode/javascript/javascript'
 import 'codemirror/addon/lint/lint'
 import 'codemirror/addon/lint/json-lint'

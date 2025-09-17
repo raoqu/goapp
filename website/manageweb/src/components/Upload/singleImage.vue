@@ -79,7 +79,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-    @import "~@/styles/mixin.scss";
+    @import "@/styles/mixin.scss";
     .upload-container {
         width: 100%;
         position: relative;

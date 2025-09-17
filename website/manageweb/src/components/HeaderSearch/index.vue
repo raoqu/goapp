@@ -21,7 +21,7 @@
 // fuse is a lightweight fuzzy-search module
 // make search results more in line with expectations
 import Fuse from 'fuse.js'
-import path from 'path'
+import { resolvePath as joinRoute } from '@/utils/routePath'
 import i18n from '@/lang'
 
 export default {
@@ -111,7 +111,7 @@ export default {
         if (router.hidden) { continue }
 
         const data = {
-          path: path.resolve(basePath, router.path),
+          path: joinRoute(basePath, router.path),
           title: [...prefixTitle]
         }
 
@@ -169,7 +169,7 @@ export default {
     display: inline-block;
     vertical-align: middle;
 
-    /deep/ .el-input__inner {
+    ::v-deep .el-input__inner {
       border-radius: 0;
       border: 0;
       padding-left: 0;

@@ -62,7 +62,7 @@
 </template>
 
 <script>
-import path from 'path'
+import { resolvePath as joinRoute } from '@/utils/routePath'
 import { deepClone } from '@/utils'
 import { getRoutes, getRoles, addRole, deleteRole, updateRole } from '@/api/role'
 import i18n from '@/lang'
@@ -135,7 +135,7 @@ export default {
         }
 
         const data = {
-          path: path.resolve(basePath, route.path),
+          path: joinRoute(basePath, route.path),
           title: route.meta && route.meta.title
 
         }
@@ -201,7 +201,7 @@ export default {
       const res = []
 
       for (const route of routes) {
-        const routePath = path.resolve(basePath, route.path)
+        const routePath = joinRoute(basePath, route.path)
 
         // recursive child routes
         if (route.children) {
@@ -255,7 +255,7 @@ export default {
       // When there is only one child route, the child route is displayed by default
       if (showingChildren.length === 1) {
         onlyOneChild = showingChildren[0]
-        onlyOneChild.path = path.resolve(parent.path, onlyOneChild.path)
+        onlyOneChild.path = joinRoute(parent.path, onlyOneChild.path)
         return onlyOneChild
       }
 

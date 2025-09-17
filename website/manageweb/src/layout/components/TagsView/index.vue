@@ -35,9 +35,9 @@
 </template>
 
 <script>
-import ScrollPane from './ScrollPane'
+import ScrollPane from './ScrollPane.vue'
 import { generateTitle } from '@/utils/i18n'
-import path from 'path'
+import { resolvePath as joinRoute } from '@/utils/routePath'
 
 export default {
   components: { ScrollPane },
@@ -84,7 +84,7 @@ export default {
       let tags = []
       routes.forEach(route => {
         if (route.meta && route.meta.affix) {
-          const tagPath = path.resolve(basePath, route.path)
+          const tagPath = joinRoute(basePath, route.path)
           tags.push({
             fullPath: tagPath,
             path: tagPath,

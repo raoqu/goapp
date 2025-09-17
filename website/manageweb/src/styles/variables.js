@@ -1,0 +1,12 @@
+// JS mirror of SCSS variables for runtime usage in Vue components
+// Keep in sync with src/styles/variables.scss
+export default {
+  menuText: '#bfcbd9',
+  menuActiveText: '#409EFF',
+  subMenuActiveText: '#f4f4f5',
+  menuBg: '#304156',
+  menuHover: '#263445',
+  subMenuBg: '#1f2d3d',
+  subMenuHover: '#001528',
+  sideBarWidth: '210px'
+}

@@ -1,5 +1,6 @@
 'use strict'
 const path = require('path')
+const webpack = require('webpack')
 const pkg = require('./package.json')
 
 function resolve(dir) {
@@ -24,12 +25,16 @@ module.exports = {
   assetsDir: 'static',
   lintOnSave: process.env.NODE_ENV === 'development',
   productionSourceMap: false,
+  // Ensure CLI expects an array and avoid older plugin assumptions
+  transpileDependencies: [],
   devServer: {
     port: port,
     open: true,
-    overlay: {
-      warnings: false,
-      errors: true
+    client: {
+      overlay: {
+        warnings: false,
+        errors: true
+      }
     },
     proxy: {
       '/api/':{
@@ -46,7 +51,13 @@ module.exports = {
         }
       }
     },
-    after: require('./mock/mock-server.js')
+    setupMiddlewares: (middlewares, devServer) => {
+      if (!devServer) {
+        throw new Error('webpack-dev-server is not defined')
+      }
+      require('./mock/mock-server.js')(devServer.app)
+      return middlewares
+    }
   },
   configureWebpack: {
     // provide the app's title in webpack's name field, so that
@@ -55,8 +66,18 @@ module.exports = {
     resolve: {
       alias: {
         '@': resolve('src')
+      },
+      fallback: {
+        path: require.resolve('path-browserify'),
+        stream: require.resolve('stream-browserify'),
+        buffer: require.resolve('buffer/')
       }
-    }
+    },
+    plugins: [
+      new webpack.ProvidePlugin({
+        Buffer: ['buffer', 'Buffer']
+      })
+    ]
   },
   chainWebpack(config) {
     config.plugins.delete('preload') // TODO: need test

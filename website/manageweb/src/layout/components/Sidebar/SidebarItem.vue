@@ -25,7 +25,7 @@
 </template>
 
 <script>
-import path from 'path'
+import { resolvePath as joinRoute } from '@/utils/routePath'
 import { generateTitle } from '@/utils/i18n'
 import { isExternal } from '@/utils/validate'
 import Item from './Item'
@@ -86,7 +86,7 @@ export default {
       if (isExternal(routePath)) {
         return routePath
       }
-      return path.resolve(this.basePath, routePath)
+      return joinRoute(this.basePath, routePath)
     },
 
     generateTitle

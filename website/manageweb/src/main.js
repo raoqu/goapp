@@ -9,7 +9,7 @@ import './styles/element-variables.scss'
 
 import '@/styles/index.scss' // global css
 
-import App from './App'
+import App from './App.vue'
 import store from './store'
 import router from './router'
 
