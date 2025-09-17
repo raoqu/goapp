@@ -12,41 +12,7 @@ export default defineConfig(({ mode }) => {
       createSvgIconsPlugin({
         iconDirs: [path.resolve(__dirname, 'src/icons/svg')],
         symbolId: 'icon-[name]'
-      })
-    ],
-    resolve: {
-      alias: {
-        '@': path.resolve(__dirname, 'src')
-      },
-      // allow importing Vue SFCs without specifying .vue
-      extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.vue']
-    },
-    define: {
-      // provide empty process.env so legacy code won't crash
-      'process.env': {}
-    },
-    server: {
-      port: 9527,
-      open: true,
-      proxy: {
-        '/api': {
-          target: 'http://127.0.0.1:8080',
-          changeOrigin: true
-          // no rewrite: keep /api prefix as requested
-        }
-      }
-    },
-    build: {
-      outDir: 'dist'
-    },
-    plugins: [
-      // existing plugins
-      vue2(),
-      createSvgIconsPlugin({
-        iconDirs: [path.resolve(__dirname, 'src/icons/svg')],
-        symbolId: 'icon-[name]'
       }),
-      // custom resolver to support importing directories as index.vue
       {
         name: 'resolve-vue-index',
         enforce: 'pre',
@@ -81,6 +47,31 @@ export default defineConfig(({ mode }) => {
           return null
         }
       }
-    ]
+    ],
+    resolve: {
+      alias: {
+        '@': path.resolve(__dirname, 'src')
+      },
+      // allow importing Vue SFCs without specifying .vue
+      extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.vue']
+    },
+    define: {
+      // provide empty process.env so legacy code won't crash
+      'process.env': {}
+    },
+    server: {
+      port: 9527,
+      open: true,
+      proxy: {
+        '/api': {
+          target: 'http://127.0.0.1:8080',
+          changeOrigin: true
+          // no rewrite: keep /api prefix as requested
+        }
+      }
+    },
+    build: {
+      outDir: 'dist'
+    }
   }
 })
