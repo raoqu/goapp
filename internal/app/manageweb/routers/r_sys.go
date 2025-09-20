@@ -18,6 +18,7 @@ func RegisterRouterSys(app *gin.RouterGroup) {
 	user := sys.User{}
 	app.GET("/user/info", user.Info)
 	app.POST("/user/login", user.Login)
+	app.POST("/user/validate", user.Validate)
 	app.POST("/user/logout", user.Logout)
 	app.POST("/user/editpwd", user.EditPwd)
 	admins := sys.Admins{}

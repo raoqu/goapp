@@ -2,6 +2,7 @@ package sys
 
 import (
 	"encoding/json"
+	"strconv"
 	"time"
 
 	"github.com/it234/goapp/internal/app/manageweb/controllers/common"
@@ -86,6 +87,39 @@ func (User) Login(c *gin.Context) {
 	common.ResSuccess(c, &resData)
 }
 
+func (User) Validate(c *gin.Context) {
+    // Read token from cookie named X-Token
+    t, err := c.Cookie(common.TOKEN_KEY)
+    if err != nil || t == "" {
+        common.ResFailCode(c, "token 无效", 50008)
+        return
+    }
+    // Parse JWT token
+    claims, ok := jwt.ParseToken(t)
+    if !ok {
+        common.ResFailCode(c, "token 无效", 50008)
+        return
+    }
+    // Validate expiration
+    expTs, _ := strconv.ParseInt(claims["exp"], 10, 64)
+    if time.Unix(expTs, 0).Before(time.Now()) {
+        common.ResFailCode(c, "token 过期", 50014)
+        return
+    }
+    // Validate UUID exists and session is in cache
+    uuid := claims["uuid"]
+    if uuid == "" {
+        common.ResFailCode(c, "token 无效", 50008)
+        return
+    }
+    if val, err := cache.Get([]byte(uuid)); err != nil || len(val) == 0 {
+        common.ResFailCode(c, "token 无效", 50008)
+        return
+    }
+    // OK
+    common.ResSuccessMsg(c)
+}
+
 // 用户登出
 func (User) Logout(c *gin.Context) {
 	t := c.GetHeader(common.TOKEN_KEY)
@@ -93,12 +127,12 @@ func (User) Logout(c *gin.Context) {
 		common.ResFail(c, "操作失败")
 		return
 	}
-	u,ok:=jwt.ParseToken(t)
+	u, ok := jwt.ParseToken(t)
 	if !ok {
 		common.ResFail(c, "操作失败")
 		return
 	}
-	cid:=u["uuid"]
+	cid := u["uuid"]
 	if cid == "" {
 		common.ResFail(c, "操作失败")
 		return
@@ -226,27 +260,27 @@ func (User) Info(c *gin.Context) {
 			return
 		}
 		if len(menuData) == 0 {
-			menuModelTop := sys.Menu{Status: 1, ParentID: 0, URL: "", Name: "TOP", Sequence: 1, MenuType: 1, Code: "TOP",OperateType:"none"}
+			menuModelTop := sys.Menu{Status: 1, ParentID: 0, URL: "", Name: "TOP", Sequence: 1, MenuType: 1, Code: "TOP", OperateType: "none"}
 			models.Create(&menuModelTop)
-			menuModelSys := sys.Menu{Status: 1, ParentID: menuModelTop.ID, URL: "", Name: "系统管理", Sequence: 1, MenuType: 1, Code: "Sys",Icon:"lock",OperateType:"none"}
+			menuModelSys := sys.Menu{Status: 1, ParentID: menuModelTop.ID, URL: "", Name: "系统管理", Sequence: 1, MenuType: 1, Code: "Sys", Icon: "lock", OperateType: "none"}
 			models.Create(&menuModelSys)
-			menuModel := sys.Menu{Status: 1, ParentID: menuModelSys.ID, URL: "/icon", Name: "图标管理", Sequence: 10, MenuType: 2, Code: "Icon",Icon:"icon",OperateType:"none"}
+			menuModel := sys.Menu{Status: 1, ParentID: menuModelSys.ID, URL: "/icon", Name: "图标管理", Sequence: 10, MenuType: 2, Code: "Icon", Icon: "icon", OperateType: "none"}
 			models.Create(&menuModel)
-			menuModel = sys.Menu{Status: 1, ParentID: menuModelSys.ID, URL: "/menu", Name: "菜单管理", Sequence: 20, MenuType: 2, Code: "Menu",Icon:"documentation",OperateType:"none"}
-			models.Create(&menuModel)
-			InitMenu(menuModel)
-			menuModel = sys.Menu{Status: 1, ParentID: menuModelSys.ID, URL: "/role", Name: "角色管理", Sequence: 30, MenuType: 2, Code: "Role",Icon:"tree",OperateType:"none"}
+			menuModel = sys.Menu{Status: 1, ParentID: menuModelSys.ID, URL: "/menu", Name: "菜单管理", Sequence: 20, MenuType: 2, Code: "Menu", Icon: "documentation", OperateType: "none"}
 			models.Create(&menuModel)
 			InitMenu(menuModel)
-			menuModel = sys.Menu{Status: 1, ParentID: menuModel.ID, URL: "/role/setrole", Name: "分配角色菜单", Sequence: 6, MenuType: 3, Code: "RoleSetrolemenu",Icon:"",OperateType:"setrolemenu"}
-			models.Create(&menuModel)
-			menuModel = sys.Menu{Status: 1, ParentID: menuModelSys.ID, URL: "/admins", Name: "后台用户管理", Sequence: 40, MenuType: 2, Code: "Admins",Icon:"user",OperateType:"none"}
+			menuModel = sys.Menu{Status: 1, ParentID: menuModelSys.ID, URL: "/role", Name: "角色管理", Sequence: 30, MenuType: 2, Code: "Role", Icon: "tree", OperateType: "none"}
 			models.Create(&menuModel)
 			InitMenu(menuModel)
-			menuModel = sys.Menu{Status: 1, ParentID: menuModel.ID, URL: "/admins/setrole", Name: "分配角色", Sequence: 6, MenuType: 3, Code: "AdminsSetrole",Icon:"",OperateType:"setadminrole"}
+			menuModel = sys.Menu{Status: 1, ParentID: menuModel.ID, URL: "/role/setrole", Name: "分配角色菜单", Sequence: 6, MenuType: 3, Code: "RoleSetrolemenu", Icon: "", OperateType: "setrolemenu"}
 			models.Create(&menuModel)
-			
-			menuData, _= getAllMenu()
+			menuModel = sys.Menu{Status: 1, ParentID: menuModelSys.ID, URL: "/admins", Name: "后台用户管理", Sequence: 40, MenuType: 2, Code: "Admins", Icon: "user", OperateType: "none"}
+			models.Create(&menuModel)
+			InitMenu(menuModel)
+			menuModel = sys.Menu{Status: 1, ParentID: menuModel.ID, URL: "/admins/setrole", Name: "分配角色", Sequence: 6, MenuType: 3, Code: "AdminsSetrole", Icon: "", OperateType: "setadminrole"}
+			models.Create(&menuModel)
+
+			menuData, _ = getAllMenu()
 		}
 	} else {
 		menuData, err = getMenusByAdminsid(userID)
@@ -257,9 +291,9 @@ func (User) Info(c *gin.Context) {
 	}
 	var menus []MenuModel
 	if len(menuData) > 0 {
-		var topmenuid uint64=menuData[0].ParentID
-		if topmenuid==0{
-			topmenuid=menuData[0].ID
+		var topmenuid uint64 = menuData[0].ParentID
+		if topmenuid == 0 {
+			topmenuid = menuData[0].ID
 		}
 		menus = setMenu(menuData, topmenuid)
 	}
@@ -271,13 +305,13 @@ func (User) Info(c *gin.Context) {
 	common.ResSuccess(c, &resData)
 }
 
-//查询所有菜单
+// 查询所有菜单
 func getAllMenu() (menus []sys.Menu, err error) {
 	models.Find(&sys.Menu{}, &menus, "parent_id asc", "sequence asc")
 	return
 }
 
-//获取超级管理员初使菜单
+// 获取超级管理员初使菜单
 func getSuperAdminMenu() (out []MenuModel) {
 	menuTop := MenuModel{
 		Path:      "/sys",
@@ -361,7 +395,7 @@ func setMenu(menus []sys.Menu, parentID uint64) (out []MenuModel) {
 	return
 }
 
-//查询登录用户权限菜单
+// 查询登录用户权限菜单
 func getMenusByAdminsid(adminsid uint64) (ret []sys.Menu, err error) {
 	menu := sys.Menu{}
 	var menus []sys.Menu
@@ -410,7 +444,6 @@ func setMenuUp(menuMapAll map[uint64]sys.Menu, menuid uint64, menuMap map[uint64
 	}
 }
 
-
 // 用户修改密码
 func (User) EditPwd(c *gin.Context) {
 	// 用户ID
@@ -420,16 +453,16 @@ func (User) EditPwd(c *gin.Context) {
 		return
 	}
 	userID := convert.ToUint64(uid)
-	reqData:=make(map[string]string)
+	reqData := make(map[string]string)
 	err := c.Bind(&reqData)
 	if err != nil {
 		common.ResErrSrv(c, err)
 		return
 	}
-	old_password:=reqData["old_password"]
+	old_password := reqData["old_password"]
 	old_password = hash.Md5String(common.MD5_PREFIX + old_password)
-	new_password:=reqData["new_password"]
-	if len(new_password)<6 || len(new_password)>20 {
+	new_password := reqData["new_password"]
+	if len(new_password) < 6 || len(new_password) > 20 {
 		common.ResFail(c, "密码长度在 6 到 20 个字符")
 		return
 	}
@@ -442,11 +475,11 @@ func (User) EditPwd(c *gin.Context) {
 		common.ResErrSrv(c, err)
 		return
 	}
-	if old_password !=modelOld.Password{
+	if old_password != modelOld.Password {
 		common.ResFail(c, "原密码输入不正确")
 		return
 	}
-	modelNew:=sys.Admins{Password:new_password}
+	modelNew := sys.Admins{Password: new_password}
 	err = models.Updates(&modelOld, &modelNew)
 	if err != nil {
 		common.ResFail(c, "操作失败")

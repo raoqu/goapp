@@ -1,6 +1,6 @@
 module github.com/it234/goapp/internal
 
-go 1.12
+go 1.18
 
 require (
 	github.com/ahmetb/go-linq v3.0.0+incompatible
