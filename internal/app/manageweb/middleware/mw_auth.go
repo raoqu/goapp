@@ -1,13 +1,10 @@
 package middleware
 
 import (
-	"strconv"
-	"time"
-
-	"github.com/it234/goapp/pkg/jwt"
 	"github.com/it234/goapp/internal/app/manageweb/controllers/common"
 	"github.com/it234/goapp/pkg/cache"
 	"github.com/it234/goapp/pkg/convert"
+	"github.com/it234/goapp/pkg/jwt"
 
 	"github.com/gin-gonic/gin"
 )
@@ -21,34 +18,34 @@ func UserAuthMiddleware(skipper ...SkipperFunc) gin.HandlerFunc {
 		}
 		var uuid string
 		if t := c.GetHeader(common.TOKEN_KEY); t != "" {
-			userInfo,ok:=jwt.ParseToken(t)
+			userInfo, ok := jwt.ParseToken(t)
 			if !ok {
-					common.ResFailCode(c,"token 无效",50008)
-			    return
-			}
-			exptimestamp, _ := strconv.ParseInt(userInfo["exp"], 10, 64)
-      exp := time.Unix(exptimestamp, 0)
-			ok=exp.After(time.Now())
-			if !ok {
-				common.ResFailCode(c,"token 过期",50014)
+				common.ResFailCode(c, "token 无效", 50008)
 				return
 			}
-			uuid=userInfo["uuid"]
+			// 		exptimestamp, _ := strconv.ParseInt(userInfo["exp"], 10, 64)
+			//   exp := time.Unix(exptimestamp, 0)
+			// 		ok=exp.After(time.Now())
+			// 		if !ok {
+			// 			common.ResFailCode(c,"token 过期",50014)
+			// 			return
+			// 		}
+			uuid = userInfo["uuid"]
 		}
 
 		if uuid != "" {
 			//查询用户ID
-			val,err:=cache.Get([]byte(uuid))
-			if err!=nil {
-				common.ResFailCode(c,"token 无效",50008)
+			val, err := cache.Get([]byte(uuid))
+			if err != nil {
+				common.ResFailCode(c, "token 无效", 50008)
 				return
 			}
-			userID:=convert.ToUint(string(val))
-			c.Set(common.USER_UUID_Key, uuid) 
-			c.Set(common.USER_ID_Key, userID) 
+			userID := convert.ToUint(string(val))
+			c.Set(common.USER_UUID_Key, uuid)
+			c.Set(common.USER_ID_Key, userID)
 		}
 		if uuid == "" {
-			common.ResFailCode(c,"用户未登录",50008)
+			common.ResFailCode(c, "用户未登录", 50008)
 			return
 		}
 	}

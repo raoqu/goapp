@@ -2,7 +2,6 @@ package sys
 
 import (
 	"encoding/json"
-	"strconv"
 	"time"
 
 	"github.com/it234/goapp/internal/app/manageweb/controllers/common"
@@ -88,36 +87,36 @@ func (User) Login(c *gin.Context) {
 }
 
 func (User) Validate(c *gin.Context) {
-    // Read token from cookie named X-Token
-    t, err := c.Cookie(common.TOKEN_KEY)
-    if err != nil || t == "" {
-        common.ResFailCode(c, "token 无效", 50008)
-        return
-    }
-    // Parse JWT token
-    claims, ok := jwt.ParseToken(t)
-    if !ok {
-        common.ResFailCode(c, "token 无效", 50008)
-        return
-    }
-    // Validate expiration
-    expTs, _ := strconv.ParseInt(claims["exp"], 10, 64)
-    if time.Unix(expTs, 0).Before(time.Now()) {
-        common.ResFailCode(c, "token 过期", 50014)
-        return
-    }
-    // Validate UUID exists and session is in cache
-    uuid := claims["uuid"]
-    if uuid == "" {
-        common.ResFailCode(c, "token 无效", 50008)
-        return
-    }
-    if val, err := cache.Get([]byte(uuid)); err != nil || len(val) == 0 {
-        common.ResFailCode(c, "token 无效", 50008)
-        return
-    }
-    // OK
-    common.ResSuccessMsg(c)
+	// Read token from cookie named X-Token
+	t, err := c.Cookie(common.TOKEN_KEY)
+	if err != nil || t == "" {
+		common.ResFailCode(c, "token 无效", 50008)
+		return
+	}
+	// Parse JWT token
+	claims, ok := jwt.ParseToken(t)
+	if !ok {
+		common.ResFailCode(c, "token 无效", 50008)
+		return
+	}
+	// Validate expiration
+	// expTs, _ := strconv.ParseInt(claims["exp"], 10, 64)
+	// if time.Unix(expTs, 0).Before(time.Now()) {
+	//     common.ResFailCode(c, "token 过期", 50014)
+	//     return
+	// }
+	// Validate UUID exists and session is in cache
+	uuid := claims["uuid"]
+	if uuid == "" {
+		common.ResFailCode(c, "token 无效", 50008)
+		return
+	}
+	if val, err := cache.Get([]byte(uuid)); err != nil || len(val) == 0 {
+		common.ResFailCode(c, "token 无效", 50008)
+		return
+	}
+	// OK
+	common.ResSuccessMsg(c)
 }
 
 // 用户登出
